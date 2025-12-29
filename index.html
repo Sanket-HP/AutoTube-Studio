@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoTube Studio | AI YouTube Automation</title>
+    <style>
+        :root {
+            --bg-color: #0f0f0f;
+            --yt-red: #ff0000;
+            --yt-red-glow: rgba(255, 0, 0, 0.4);
+            --text-primary: #ffffff;
+            --text-secondary: #aaaaaa;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent-glow: 0 0 20px var(--yt-red-glow);
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- BACKGROUND ANIMATIONS --- */
+        .bg-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            background: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #0f0f0f 100%);
+        }
+
+        .bg-gradient-move {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 0, 0, 0.05) 0%, transparent 40%);
+            animation: gradientShift 15s ease-in-out infinite alternate;
+        }
+
+        @keyframes gradientShift {
+            0% { transform: translate(-25%, -25%); }
+            100% { transform: translate(0, 0); }
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.1;
+            filter: blur(2px);
+            animation: float 20s infinite linear;
+        }
+
+        .shape-play {
+            width: 0; height: 0;
+            border-top: 30px solid transparent;
+            border-bottom: 30px solid transparent;
+            border-left: 50px solid white;
+            top: 15%; left: 10%;
+        }
+
+        .shape-rect {
+            width: 100px; height: 60px;
+            border: 2px solid white;
+            border-radius: 8px;
+            top: 70%; right: 15%;
+            animation-duration: 25s;
+        }
+
+        .shape-bar {
+            width: 4px; height: 80px;
+            background: white;
+            bottom: 10%; left: 20%;
+            box-shadow: 10px 0 0 white, 20px -20px 0 white;
+            animation-duration: 18s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, 50px) rotate(10deg); }
+            66% { transform: translate(-20px, 80px) rotate(-5deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+
+        /* --- NAVIGATION / LOGO --- */
+        header {
+            padding: clamp(20px, 5vh, 40px) 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+        }
+
+        .logo-icon {
+            width: 50px; height: 50px;
+            background: var(--yt-red);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 0 15px var(--yt-red);
+            animation: logoPulse 2s infinite ease-in-out;
+        }
+
+        .logo-icon::after {
+            content: '';
+            width: 0; height: 0;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            border-left: 14px solid white;
+            margin-left: 4px;
+        }
+
+        .logo-icon::before {
+            content: '';
+            position: absolute;
+            width: 70px; height: 70px;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            border-radius: 15px;
+            animation: circuitSpin 4s linear infinite;
+        }
+
+        @keyframes logoPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 15px var(--yt-red); }
+            50% { transform: scale(1.1); box-shadow: 0 0 30px var(--yt-red); }
+        }
+
+        @keyframes circuitSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .logo-text {
+            font-size: clamp(1.4rem, 4vw, 1.8rem);
+            font-weight: 800;
+            letter-spacing: -1px;
+            text-transform: uppercase;
+            background: linear-gradient(to bottom, #fff, #888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            max-width: 1000px;
+            margin: clamp(40px, 8vh, 80px) auto;
+            text-align: center;
+            padding: 0 24px;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        h1 {
+            font-size: clamp(2.2rem, 7vw, 4.5rem);
+            line-height: 1.1;
+            margin-bottom: 24px;
+            font-weight: 900;
+            letter-spacing: -0.02em;
+        }
+
+        .highlight {
+            color: var(--yt-red);
+            text-shadow: 0 0 20px var(--yt-red-glow);
+        }
+
+        .subheading {
+            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            color: var(--text-secondary);
+            margin-bottom: clamp(30px, 5vh, 48px);
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-group {
+            display: flex;
+            justify-content: center;
+            gap: clamp(12px, 2vw, 20px);
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: clamp(12px, 2vh, 18px) clamp(24px, 3vw, 40px);
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            font-weight: 700;
+            border-radius: 50px;
+            text-decoration: none;
+            transition: var(--transition);
+            display: inline-block;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: var(--yt-red);
+            color: white;
+            box-shadow: 0 10px 20px rgba(255, 0, 0, 0.2);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 30px var(--yt-red-glow);
+        }
+
+        .btn-secondary {
+            border: 2px solid var(--glass-border);
+            color: white;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(5px);
+        }
+
+        .btn-secondary:hover {
+            border-color: white;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-3px);
+        }
+
+        /* --- FEATURE CARDS --- */
+        .section-title {
+            text-align: center;
+            margin: clamp(60px, 10vh, 120px) 0 clamp(30px, 5vh, 60px);
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            padding: 0 20px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(clamp(280px, 30vw, 360px), 1fr));
+            gap: clamp(20px, 3vw, 32px);
+            max-width: 1200px;
+            margin: 0 auto clamp(60px, 10vh, 120px);
+            padding: 0 24px;
+        }
+
+        .card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            padding: clamp(24px, 4vw, 48px);
+            border-radius: 24px;
+            transition: var(--transition);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            animation: fadeInUp 1s ease-out both;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 0, 0, 0.4);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .card-icon {
+            width: 56px; height: 56px;
+            background: rgba(255, 0, 0, 0.1);
+            border-radius: 14px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 0, 0, 0.2);
+            font-size: 1.5rem;
+        }
+
+        .card h3 { margin-bottom: 12px; font-size: 1.4rem; font-weight: 700; }
+        .card p { color: var(--text-secondary); font-size: clamp(0.9rem, 1.5vw, 1rem); }
+
+        /* --- API GUIDE SECTION --- */
+        .api-guide {
+            max-width: 1100px;
+            margin: clamp(60px, 10vh, 120px) auto;
+            padding: clamp(40px, 6vw, 80px) clamp(20px, 4vw, 40px);
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: clamp(24px, 4vw, 48px);
+            border: 1px solid var(--glass-border);
+        }
+
+        .guide-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: clamp(40px, 6vw, 80px);
+            align-items: center;
+        }
+
+        .guide-steps {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(20px, 3vh, 32px);
+        }
+
+        .guide-step-item {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .step-bubble {
+            flex-shrink: 0;
+            width: 36px; height: 36px;
+            background: var(--yt-red);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            box-shadow: 0 0 15px var(--yt-red-glow);
+        }
+
+        .guide-step-content h4 { font-size: 1.15rem; margin-bottom: 6px; }
+        .guide-step-content p { color: var(--text-secondary); font-size: 0.95rem; }
+
+        .browser-mockup {
+            background: #1a1a1a;
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            overflow: hidden;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+            width: 100%;
+        }
+
+        .browser-header {
+            background: #252525;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: #444; }
+        .browser-url {
+            background: #121212;
+            flex-grow: 1;
+            padding: 6px 15px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: #777;
+            text-align: center;
+        }
+
+        .browser-body {
+            padding: clamp(30px, 5vw, 60px);
+            text-align: center;
+            background: radial-gradient(circle at center, #222, #1a1a1a);
+        }
+
+        /* --- WORKFLOW --- */
+        .workflow { max-width: 1100px; margin: 0 auto clamp(100px, 15vh, 180px); padding: 0 24px; }
+        .steps { 
+            display: grid; 
+            grid-template-columns: repeat(5, 1fr); 
+            gap: 20px; 
+            position: relative; 
+        }
+
+        .steps::before {
+            content: ''; position: absolute; top: 30px; left: 10%; width: 80%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--yt-red), transparent); z-index: -1;
+        }
+
+        .step { text-align: center; }
+        .step-num {
+            width: 60px; height: 60px; background: var(--bg-color); border: 2.5px solid var(--yt-red);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 24px; font-weight: 900; font-size: 1.5rem; color: var(--yt-red);
+            box-shadow: 0 0 20px var(--yt-red-glow);
+            transition: 0.3s;
+        }
+        .step:hover .step-num { transform: scale(1.1); background: var(--yt-red); color: white; }
+        .step h4 { margin-bottom: 8px; font-size: 1.1rem; }
+        .step p { color: var(--text-secondary); font-size: 0.85rem; padding: 0 10px; }
+
+        /* --- PRIVACY --- */
+        .privacy { padding: clamp(60px, 10vh, 120px) 24px; text-align: center; }
+        .privacy-box {
+            max-width: 900px; margin: 0 auto; border: 1px dashed var(--yt-red); padding: clamp(40px, 6vw, 80px);
+            border-radius: 32px; background: rgba(15, 15, 15, 0.9);
+        }
+        .shield-css {
+            width: 60px; height: 70px; background: var(--yt-red); margin: 0 auto 32px;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 25px var(--yt-red-glow);
+        }
+        .shield-css::after { content: '✓'; color: white; font-weight: bold; font-size: 2.2rem; }
+
+        /* --- FOOTER --- */
+        footer { 
+            padding: 80px 24px; 
+            text-align: center; 
+            border-top: 1px solid var(--glass-border); 
+            color: var(--text-secondary); 
+            background: rgba(0,0,0,0.3);
+        }
+        .footer-links { margin-top: 24px; display: flex; justify-content: center; gap: 40px; }
+        .footer-links a { color: var(--text-secondary); text-decoration: none; transition: 0.3s; font-weight: 500; }
+        .footer-links a:hover { color: var(--yt-red); }
+
+        /* --- RESPONSIVE BREAKPOINTS --- */
+        
+        /* Tablet (iPad Pro, Surface Pro) */
+        @media (max-width: 1024px) {
+            .guide-grid { grid-template-columns: 1fr; gap: 60px; }
+            .browser-mockup { max-width: 600px; margin: 0 auto; }
+            .steps { grid-template-columns: repeat(3, 1fr); gap: 40px; }
+            .steps::before { display: none; }
+        }
+
+        /* Mobile Large & Tablets */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.8rem; }
+            .cta-group { flex-direction: column; width: 100%; max-width: 400px; margin: 0 auto; }
+            .btn { width: 100%; }
+            .features-grid { grid-template-columns: 1fr; }
+            .steps { grid-template-columns: 1fr; gap: 48px; }
+            .logo-text { font-size: 1.5rem; }
+            .privacy-box { padding: 40px 24px; }
+        }
+
+        /* Small Mobile (iPhone SE/Mini) */
+        @media (max-width: 480px) {
+            header { padding-top: 30px; }
+            .hero h1 { font-size: 2.2rem; }
+            .section-title { font-size: 1.4rem; }
+            .footer-links { flex-direction: column; gap: 15px; }
+            .guide-step-item { gap: 15px; }
+        }
+
+        /* Animation */
+        @keyframes fadeInUp { 
+            from { opacity: 0; transform: translateY(30px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        html { scroll-behavior: smooth; }
+    </style>
+</head>
+<body>
+
+    <div class="bg-layer">
+        <div class="bg-gradient-move"></div>
+        <div class="shape shape-play"></div>
+        <div class="shape shape-rect"></div>
+        <div class="shape shape-bar"></div>
+    </div>
+
+    <header>
+        <div class="logo-container">
+            <div class="logo-icon"></div>
+            <div class="logo-text">AutoTube Studio</div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h1>Create & Publish YouTube Videos <span class="highlight">Using Your Own AI</span></h1>
+            <p class="subheading">End-to-end YouTube automation. 100% frontend. Powered by Gemini. No monthly fees, no tracking, just pure creation.</p>
+            <div class="cta-group">
+                <a href="/main.html" class="btn btn-primary">Launch Studio Now</a>
+                <a href="#how-to-api" class="btn btn-secondary">Get Your API Key</a>
+            </div>
+        </section>
+
+        <h2 class="section-title">Studio Features</h2>
+        <section class="features-grid">
+            <div class="card">
+                <div class="card-icon">🔑</div>
+                <h3>Bring Your Own Gemini API</h3>
+                <p>Plug in your Google AI key and use the world's most capable creative model without middleman fees or markup.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🧬</div>
+                <h3>Channel DNA Engine</h3>
+                <p>Define your tone, style, and niche. Our engine ensures every video stays consistent with your unique brand identity.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🪝</div>
+                <h3>Hook-First Script AI</h3>
+                <p>Optimized for retention. Generate scripts that grab attention in the first 3 seconds and keep viewers glued to the screen.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🎬</div>
+                <h3>Visual Director AI</h3>
+                <p>Automated scene selection and editing instructions generated entirely within your browser environment for maximum speed.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🖼️</div>
+                <h3>Thumbnail & SEO AI</h3>
+                <p>Generate high-click-through thumbnails and keyword-rich titles that the YouTube algorithm prioritizes in searches.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🚀</div>
+                <h3>One-Click Publishing</h3>
+                <p>Export and upload directly to your channel using secure OAuth integration—no backend processing required.</p>
+            </div>
+        </section>
+
+        <section class="api-guide" id="how-to-api">
+            <h2 style="text-align: center; margin-bottom: clamp(30px, 5vh, 60px); font-size: clamp(1.8rem, 5vw, 2.5rem);">How to Get Your <span class="highlight">Gemini API Key</span></h2>
+            <div class="guide-grid">
+                <div class="guide-steps">
+                    <div class="guide-step-item">
+                        <div class="step-bubble">1</div>
+                        <div class="guide-step-content">
+                            <h4>Visit Google AI Studio</h4>
+                            <p>Go to <strong>aistudio.google.com</strong>. It's Google's dedicated workspace for developers to use Gemini models.</p>
+                        </div>
+                    </div>
+                    <div class="guide-step-item">
+                        <div class="step-bubble">2</div>
+                        <div class="guide-step-content">
+                            <h4>Sign In & Accept</h4>
+                            <p>Sign in with your standard Google account and accept the developer terms of service to access your personal dashboard.</p>
+                        </div>
+                    </div>
+                    <div class="guide-step-item">
+                        <div class="step-bubble">3</div>
+                        <div class="guide-step-content">
+                            <h4>Navigate to 'Get API key'</h4>
+                            <p>Click the "Get API key" link in the left-hand menu. This is your control center for secure AI access.</p>
+                        </div>
+                    </div>
+                    <div class="guide-step-item">
+                        <div class="step-bubble">4</div>
+                        <div class="guide-step-content">
+                            <h4>Generate & Copy</h4>
+                            <p>Click "Create API key in new project". Copy the key and paste it into the Studio to unlock full automation.</p>
+                        </div>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <a href="https://aistudio.google.com/" target="_blank" class="btn btn-primary">Go to Google AI Studio →</a>
+                    </div>
+                </div>
+                <div class="browser-mockup">
+                    <div class="browser-header">
+                        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                        <div class="browser-url">aistudio.google.com/app/apikey</div>
+                    </div>
+                    <div class="browser-body">
+                        <div style="background: var(--yt-red); color: white; display: inline-block; padding: 12px 24px; border-radius: 10px; font-weight: 800; margin-bottom: 24px; font-size: 0.9rem;">+ Create API Key</div>
+                        <div style="height: 1px; background: rgba(255,255,255,0.1); width: 100%; margin: 24px 0;"></div>
+                        <div style="text-align: left; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #777; background: #121212; padding: 15px; border-radius: 8px;">
+                            Project: [MyAutoTube_Auto]<br>
+                            Key: AIzaSyD...xR4z9 <span style="color: var(--yt-red); float: right;">(Copy)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <h2 class="section-title">The Workflow</h2>
+        <section class="workflow">
+            <div class="steps">
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <h4>Connect</h4>
+                    <p>Paste your secure Gemini Key</p>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <h4>DNA</h4>
+                    <p>Train AI on your channel niche</p>
+                </div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <h4>Ideate</h4>
+                    <p>Generate high-retention topics</p>
+                </div>
+                <div class="step">
+                    <div class="step-num">4</div>
+                    <h4>Produce</h4>
+                    <p>Create visual assets & scripts</p>
+                </div>
+                <div class="step">
+                    <div class="step-num">5</div>
+                    <h4>Publish</h4>
+                    <p>Instant upload to YouTube</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="privacy">
+            <div class="privacy-box">
+                <div class="shield-css"></div>
+                <h2 style="font-size: clamp(1.8rem, 5vw, 2.5rem); margin-bottom: 20px;">Your Data, Your Control</h2>
+                <p class="subheading" style="margin-bottom: 30px;">AutoTube Studio is the first AI YouTube platform that runs <strong>entirely in your browser</strong>. We have no servers, which means your API keys and creative scripts never leave your machine.</p>
+                <div class="cta-group" style="justify-content: center; gap: clamp(20px, 4vw, 40px);">
+                    <span style="color: var(--yt-red); font-weight: 800; font-size: 0.9rem;">● NO BACKEND</span>
+                    <span style="color: var(--yt-red); font-weight: 800; font-size: 0.9rem;">● NO TRACKING</span>
+                    <span style="color: var(--yt-red); font-weight: 800; font-size: 0.9rem;">● NO STORAGE</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="hero" style="margin-bottom: clamp(100px, 15vh, 180px);">
+            <h2 style="font-size: clamp(1.8rem, 5vw, 3rem); line-height: 1.2;">The First AI YouTube Studio That Runs Entirely in Your Browser.</h2>
+            <p class="subheading">Stop paying for overpriced subscriptions. Build your empire today with your own keys.</p>
+            <a href="#" class="btn btn-primary" style="padding: clamp(18px, 2.5vh, 24px) clamp(40px, 5vw, 80px); font-size: 1.2rem;">Start Creating for Free</a>
+        </section>
+    </main>
+
+    <footer>
+        <p>AutoTube Studio © 2026 — Built for the next generation of creators.</p>
+        <div class="footer-links">
+            <a href="#">Privacy</a>
+            <a href="#">Terms</a>
+            <a href="#">Docs</a>
+        </div>
+    </footer>
+
+</body>
+</html>
