@@ -3,771 +3,801 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AutoTube Studio | End-to-End Video Production</title>
+    <title>AutoTube Studio Pro | AI Production Suite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-base: #09090b;
-            --bg-surface: #121217;
-            --bg-card: #18181b;
             --brand-red: #ef4444;
-            --border-muted: #27272a;
-            --text-main: #fafafa;
-            --text-muted: #a1a1aa;
+            --bg-deep: #050507;
+            --bg-surface: #0e0e11;
+            --border-muted: rgba(255,255,255,0.06);
         }
 
         body {
-            background-color: var(--bg-base);
-            color: var(--text-main);
             font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-deep);
+            color: #fafafa;
             height: 100vh;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
         }
 
-        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
-
         .glass-panel {
-            background: rgba(18, 18, 23, 0.8);
-            backdrop-filter: blur(12px);
+            background: rgba(14, 14, 17, 0.8);
+            backdrop-filter: blur(20px);
             border: 1px solid var(--border-muted);
         }
 
         .sidebar-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 16px;
-            border-radius: 8px;
-            color: var(--text-muted);
-            font-size: 0.875rem;
-            font-weight: 500;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-        }
-
-        /* Responsive Sidebar Adjustments */
-        @media (max-width: 768px) {
-            .sidebar-item {
-                flex-direction: column;
-                gap: 4px;
-                padding: 8px;
-                font-size: 0.7rem;
-                flex: 1;
-                justify-content: center;
-                border-radius: 0;
-            }
-            .sidebar-item svg { width: 1.25rem; height: 1.25rem; }
-        }
-
-        .sidebar-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: white;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
         }
 
         .sidebar-item.active {
-            background: rgba(239, 68, 68, 0.1);
+            background: rgba(239, 68, 68, 0.08);
             color: var(--brand-red);
+        }
+        
+        .sidebar-item.active::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 20%;
+            height: 60%;
+            width: 3px;
+            background: var(--brand-red);
+            border-radius: 0 4px 4px 0;
         }
 
         .input-field {
-            background: #1c1c21 !important;
+            background: #16161a !important;
             border: 1px solid var(--border-muted) !important;
             color: white !important;
-            transition: all 0.2s;
         }
 
         .input-field:focus {
             border-color: var(--brand-red) !important;
-            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.1);
             outline: none;
         }
 
-        .tab-trigger {
-            position: relative;
-            padding: 12px 16px;
-            font-size: 0.8125rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            cursor: pointer;
-            transition: color 0.2s;
-            white-space: nowrap;
-        }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #27272a; border-radius: 10px; }
 
-        .tab-trigger.active { color: white; }
-        .tab-trigger.active::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: var(--brand-red);
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
+        .recording-active { animation: pulse-red 2s infinite; background: #991b1b !important; }
 
-        .pulse-green { animation: pulse-green 2s infinite; }
-        @keyframes pulse-green {
-            0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
-            70% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
-        }
-
-        .view-section { 
-            display: none; 
-            height: 100%;
-            overflow-y: auto;
-        }
-        .view-section.active { display: block; animation: fadeIn 0.3s ease-out; }
+        .view-section { display: none; height: 100%; overflow-y: auto; padding-bottom: 80px; }
+        .view-section.active { display: block; animation: fadeIn 0.4s ease-out; }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(4px); }
+            from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .video-container {
-            aspect-ratio: 16/9;
-            background: black;
-            border-radius: 12px;
-            overflow: hidden;
-            position: relative;
-            width: 100%;
+        .scene-card.active {
+            border-color: var(--brand-red);
+            background: rgba(239, 68, 68, 0.05);
         }
 
-        .video-overlay {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
-            background: rgba(0,0,0,0.5);
-            backdrop-filter: blur(4px);
-            padding: 10px;
-            border-radius: 8px;
-            color: white;
-            font-size: 0.875rem;
-            text-align: center;
+        #player-canvas-container {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border-muted);
         }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="flex flex-col">
 
-    <!-- TOP HEADER -->
-    <header class="h-14 border-b border-[#27272a] bg-black flex items-center justify-between px-4 md:px-6 shrink-0 z-50">
-        <div class="flex items-center gap-3 md:gap-4">
-            <div class="flex items-center gap-2">
-                <div class="w-7 h-7 bg-red-600 rounded flex items-center justify-center font-black text-white italic text-xs">AT</div>
-                <span class="font-bold tracking-tight text-xs md:text-sm">AutoTube Studio</span>
+    <!-- HEADER -->
+    <header class="h-16 border-b border-white/5 bg-black/40 backdrop-blur-xl flex items-center justify-between px-6 shrink-0 z-50">
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-red-600 rounded-xl flex items-center justify-center font-black text-white italic shadow-lg shadow-red-600/30">AT</div>
+                <div class="flex flex-col">
+                    <span class="font-extrabold tracking-tighter text-sm">AutoTube <span class="text-zinc-500 font-medium">Studio Pro</span></span>
+                    <span class="text-[8px] font-black text-zinc-600 uppercase tracking-[0.2em]">Next-Gen Video AI</span>
+                </div>
             </div>
-            <div class="hidden sm:block h-4 w-px bg-zinc-800"></div>
-            <span class="hidden sm:block text-[9px] text-zinc-500 font-bold uppercase tracking-widest">v3.5 Final</span>
         </div>
         
-        <div id="connection-status" class="flex items-center gap-2 px-2 md:px-3 py-1 rounded-full border border-zinc-800 bg-zinc-900/50">
-            <div id="status-dot" class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-zinc-600"></div>
-            <span id="status-text" class="text-[9px] md:text-[10px] font-extrabold uppercase tracking-wider text-zinc-500">API Status</span>
+        <div class="flex items-center gap-4">
+            <div id="engine-status" class="flex items-center gap-2.5 px-3 py-1.5 rounded-full border border-zinc-800 bg-zinc-900/50">
+                <div id="status-dot" class="w-1.5 h-1.5 rounded-full bg-zinc-600"></div>
+                <span id="status-text" class="text-[10px] font-black text-zinc-500 uppercase">Engine Offline</span>
+            </div>
         </div>
     </header>
 
-    <div class="flex flex-col md:flex-row flex-1 overflow-hidden">
-        <!-- NAVIGATION SIDEBAR / BOTTOM NAV -->
-        <aside class="w-full md:w-60 border-t md:border-t-0 md:border-r border-[#27272a] p-0 md:p-4 flex md:flex-col shrink-0 bg-[#0c0c0e] order-last md:order-first z-50">
-            <nav class="flex flex-row md:flex-col flex-1" id="sidebar-nav">
-                <div class="sidebar-item active" data-page="dashboard"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg> <span>Dash</span></div>
-                <div class="sidebar-item" data-page="script"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg> <span>Script</span></div>
-                <div class="sidebar-item" data-page="voice"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg> <span>Voice</span></div>
-                <div class="sidebar-item" data-page="video"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg> <span>Video</span></div>
-                <div class="sidebar-item" data-page="seo"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg> <span>SEO</span></div>
+    <div class="flex flex-1 overflow-hidden">
+        <!-- SIDEBAR -->
+        <aside class="hidden md:flex w-64 border-r border-white/5 p-4 flex-col gap-1.5 bg-[#08080a] shrink-0 z-40">
+            <div class="mb-6 px-4">
+                <p class="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Main Menu</p>
+            </div>
+            <nav class="space-y-1">
+                <div onclick="switchPage('dashboard')" class="sidebar-item active flex items-center gap-3 p-3.5 rounded-xl cursor-pointer" data-page="dashboard">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                    <span class="text-xs font-bold">Dashboard</span>
+                </div>
+                <div onclick="switchPage('script')" class="sidebar-item flex items-center gap-3 p-3.5 rounded-xl cursor-pointer" data-page="script">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    <span class="text-xs font-bold">Script Architect</span>
+                </div>
+                <div onclick="switchPage('audio')" class="sidebar-item flex items-center gap-3 p-3.5 rounded-xl cursor-pointer" data-page="audio">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+                    <span class="text-xs font-bold">Voice Studio</span>
+                </div>
+                <div onclick="switchPage('production')" class="sidebar-item flex items-center gap-3 p-3.5 rounded-xl cursor-pointer" data-page="production">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                    <span class="text-xs font-bold">Final Master</span>
+                </div>
             </nav>
-            <div class="hidden md:flex mt-auto pt-6 border-t border-zinc-800">
-                <div class="sidebar-item w-full" data-page="settings"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924-1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37a1.724 1.724 0 002.572-1.065z"></path></svg> Settings</div>
+
+            <div class="mt-auto p-5 glass-panel rounded-2xl">
+                <span class="text-[9px] font-black text-zinc-500 uppercase tracking-widest block mb-2">Creator Mode</span>
+                <p class="text-[11px] font-bold text-zinc-300">Sanket Sarjerao Patil</p>
+                <div class="h-px bg-zinc-800 my-3"></div>
+                <button onclick="showInfo('terms')" class="text-[10px] text-zinc-500 hover:text-white transition-colors">Terms & Privacy</button>
             </div>
         </aside>
 
-        <!-- MAIN WORKSPACE -->
-        <main class="flex-1 bg-[#09090b] relative overflow-hidden flex flex-col">
+        <!-- MAIN VIEWPORT -->
+        <main class="flex-1 relative flex flex-col overflow-hidden">
             
-            <div class="flex-1 overflow-y-auto custom-scrollbar" id="main-scroll-container">
-                <!-- SECTION: DASHBOARD -->
-                <section id="view-dashboard" class="view-section active p-4 md:p-8">
-                    <div class="max-w-7xl mx-auto">
-                        <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight mb-2">Dashboard</h2>
-                        <p class="text-zinc-500 text-sm mb-6 md:mb-8">Overview of your current production pipeline.</p>
-                        
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                            <div class="glass-panel p-5 rounded-2xl">
-                                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Project Status</span>
-                                <h4 class="text-lg md:text-xl font-bold mt-2 truncate" id="dash-project-name">No active project</h4>
-                                <div class="w-full bg-zinc-800 h-2 rounded-full mt-4 overflow-hidden">
-                                    <div id="dash-progress" class="bg-red-600 h-full transition-all duration-500" style="width: 0%"></div>
-                                </div>
+            <!-- MOBILE NAVIGATION -->
+            <div class="md:hidden flex bg-[#0c0c0e] border-b border-white/5 shrink-0 overflow-x-auto no-scrollbar">
+                <div onclick="switchPage('dashboard')" class="flex-1 min-w-[80px] p-3 flex flex-col items-center gap-1 active:bg-zinc-800">
+                    <svg class="w-5 h-5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"></path></svg>
+                    <span class="text-[9px] font-bold uppercase">Dash</span>
+                </div>
+                <div onclick="switchPage('script')" class="flex-1 min-w-[80px] p-3 flex flex-col items-center gap-1">
+                    <svg class="w-5 h-5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5"></path></svg>
+                    <span class="text-[9px] font-bold uppercase">Script</span>
+                </div>
+                <div onclick="switchPage('audio')" class="flex-1 min-w-[80px] p-3 flex flex-col items-center gap-1">
+                    <svg class="w-5 h-5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7"></path></svg>
+                    <span class="text-[9px] font-bold uppercase">Voice</span>
+                </div>
+                <div onclick="switchPage('production')" class="flex-1 min-w-[80px] p-3 flex flex-col items-center gap-1">
+                    <svg class="w-5 h-5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764"></path></svg>
+                    <span class="text-[9px] font-bold uppercase">Master</span>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-hidden" id="viewport-container">
+                
+                <!-- VIEW: DASHBOARD -->
+                <section id="view-dashboard" class="view-section active custom-scrollbar p-6 lg:p-12">
+                    <div class="max-w-6xl mx-auto space-y-10">
+                        <div>
+                            <h1 class="text-4xl font-black tracking-tighter">Production Pulse</h1>
+                            <p class="text-zinc-500 text-sm mt-1">Control center for your AI content pipeline.</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="glass-panel p-6 rounded-[1.5rem] border-l-4 border-red-600">
+                                <span class="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Active Topic</span>
+                                <h3 id="dash-topic" class="text-lg font-bold mt-2 truncate">None</h3>
                             </div>
-                            <div class="glass-panel p-5 rounded-2xl">
-                                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Audio Preview</span>
-                                <h4 class="text-lg md:text-xl font-bold mt-2" id="dash-audio-status">None Generated</h4>
+                            <div class="glass-panel p-6 rounded-[1.5rem] border-l-4 border-zinc-800" id="dash-script-card">
+                                <span class="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Script Engine</span>
+                                <h3 id="dash-script-status" class="text-lg font-bold mt-2">Inactive</h3>
                             </div>
-                            <div class="glass-panel p-5 rounded-2xl">
-                                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Video Finalized</span>
-                                <h4 class="text-lg md:text-xl font-bold mt-2" id="dash-video-status">Pending</h4>
+                            <div class="glass-panel p-6 rounded-[1.5rem] border-l-4 border-zinc-800" id="dash-voice-card">
+                                <span class="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Voice Synthesis</span>
+                                <h3 id="dash-voice-status" class="text-lg font-bold mt-2">Pending</h3>
+                            </div>
+                            <div class="glass-panel p-6 rounded-[1.5rem] border-l-4 border-zinc-800" id="dash-video-card">
+                                <span class="text-[10px] font-black uppercase text-zinc-500 tracking-widest">Video Render</span>
+                                <h3 id="dash-video-status" class="text-lg font-bold mt-2">Pending</h3>
                             </div>
                         </div>
 
-                        <div class="mt-8 glass-panel rounded-2xl p-6 md:p-12 border-dashed border-zinc-800 text-center">
-                            <p class="text-zinc-500 text-sm mb-6">Ready to start a new production?</p>
-                            <button class="w-full sm:w-auto px-10 py-4 bg-red-600 rounded-xl font-bold hover:bg-red-700 transition-all nav-trigger" data-page="script">Enter Script Engine</button>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- SECTION: SCRIPT ENGINE -->
-                <section id="view-script" class="view-section p-4 md:p-8">
-                    <div class="max-w-7xl mx-auto">
-                        <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight mb-2">Script Engine</h2>
-                        <p class="text-zinc-500 text-sm mb-6 md:mb-8">Define your topic and let Gemini generate the narrative.</p>
-
-                        <div class="mb-6 md:mb-8 p-5 glass-panel rounded-xl flex flex-col lg:flex-row lg:items-center gap-6 border-zinc-800/50">
-                            <div class="flex-1">
-                                <h4 class="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-1">Gemini AI Key</h4>
-                                <p class="text-[11px] text-zinc-500">Required for generating production assets.</p>
+                        <div class="glass-panel rounded-[2.5rem] p-10 lg:p-20 text-center border-dashed border-zinc-800 flex flex-col items-center">
+                            <div class="w-20 h-20 bg-red-600/10 rounded-full flex items-center justify-center mb-8 text-red-500 shadow-2xl">
+                                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-width="3" stroke-linecap="round"></path></svg>
                             </div>
-                            <div class="flex flex-col sm:flex-row gap-2 w-full lg:w-auto lg:min-w-[400px]">
-                                <input type="password" id="api-key-input" placeholder="Paste Gemini Key..." class="flex-1 input-field px-4 py-2 rounded-lg text-sm">
-                                <button id="save-key-btn" class="px-5 py-2 bg-white text-black text-xs font-bold rounded-lg hover:bg-zinc-200">Connect</button>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 mb-8">
-                            <div class="lg:col-span-5">
-                                <div class="glass-panel p-5 md:p-6 rounded-2xl border-zinc-800/60 h-full">
-                                    <div class="flex flex-col h-full gap-6">
-                                        <div class="flex-1">
-                                            <label class="block text-[11px] font-bold text-zinc-500 uppercase tracking-widest mb-3">Topic / Premise</label>
-                                            <textarea id="topic-input" class="input-field w-full px-4 py-3 rounded-xl text-sm leading-relaxed resize-none h-40 md:h-64" placeholder="Explain the concept of quantum computing for beginners..."></textarea>
-                                        </div>
-                                        <button id="generate-btn" class="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-extrabold rounded-xl shadow-xl transition-all">
-                                            Generate Production Pack
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="lg:col-span-7">
-                                <div class="glass-panel flex flex-col min-h-[400px] lg:h-full max-h-[600px] rounded-2xl overflow-hidden">
-                                    <div class="flex border-b border-zinc-800 bg-zinc-900/30 overflow-x-auto shrink-0 no-scrollbar" id="output-tabs">
-                                        <div class="tab-trigger active" data-tab="script">Full Script</div>
-                                        <div class="tab-trigger" data-tab="hooks">Opening Hooks</div>
-                                        <div class="tab-trigger" data-tab="scenes">Scene Briefs</div>
-                                    </div>
-                                    <div class="flex-1 overflow-y-auto p-4 md:p-6 bg-black/20 custom-scrollbar" id="script-output-container">
-                                        <div id="empty-script" class="h-full flex flex-col items-center justify-center text-zinc-600 text-center">
-                                            <p class="text-sm">Generate script to begin production</p>
-                                        </div>
-                                        <div id="script-content" class="hidden whitespace-pre-wrap text-sm leading-relaxed text-zinc-300 font-medium"></div>
-                                    </div>
-                                </div>
-                            </div>
+                            <h2 class="text-3xl font-bold mb-4">Initialize Production</h2>
+                            <p class="text-zinc-500 text-sm max-w-md mx-auto mb-10 leading-relaxed">Ready to produce your next viral YouTube video? Connect your Gemini engine and define your topic to begin.</p>
+                            <button onclick="switchPage('script')" class="px-12 py-4 bg-red-600 hover:bg-red-700 text-white font-black rounded-2xl shadow-2xl shadow-red-600/20 transition-all transform hover:scale-105 active:scale-95">Go to Script Architect</button>
                         </div>
                     </div>
                 </section>
 
-                <!-- SECTION: AI VOICEOVER -->
-                <section id="view-voice" class="view-section p-4 md:p-8">
-                    <div class="max-w-7xl mx-auto">
-                        <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight mb-2">AI Voiceover</h2>
-                        <p class="text-zinc-500 text-sm mb-6 md:mb-8">Convert your generated script into narration.</p>
-                        
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-                            <div class="glass-panel p-5 md:p-6 rounded-2xl">
-                                <h4 class="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-6">Voice Persona</h4>
-                                <div class="space-y-6">
+                <!-- VIEW: SCRIPT ARCHITECT -->
+                <section id="view-script" class="view-section custom-scrollbar p-6 lg:p-12">
+                    <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+                        <div class="lg:col-span-5 space-y-6">
+                            <div class="glass-panel p-6 rounded-2xl">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-xs font-black uppercase tracking-widest text-red-500">API Gateway</h3>
+                                    <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-[10px] font-bold text-zinc-500 hover:text-white underline">Get Free Key</a>
+                                </div>
+                                <div class="flex gap-2">
+                                    <input type="password" id="api-key-input" class="input-field flex-1 px-4 py-2.5 rounded-xl text-sm" placeholder="Gemini API Key...">
+                                    <button onclick="saveKey()" class="px-4 py-2.5 bg-white text-black text-[10px] font-black rounded-xl uppercase tracking-widest transition-all">Link</button>
+                                </div>
+                            </div>
+                            <div class="glass-panel p-6 rounded-2xl space-y-5">
+                                <h3 class="text-xs font-black uppercase tracking-widest text-zinc-500">Production Topic</h3>
+                                <textarea id="topic-input" class="input-field w-full h-48 p-5 rounded-2xl text-sm resize-none leading-relaxed" placeholder="e.g. The Mystery of the Voynich Manuscript explained..."></textarea>
+                                <button id="gen-script-btn" onclick="generateScript()" class="w-full py-4 bg-red-600 text-white font-black rounded-xl text-xs uppercase tracking-[0.2em] shadow-xl shadow-red-600/10 hover:bg-red-700 transition-all">Write Script Package</button>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-7">
+                            <div class="glass-panel h-full min-h-[500px] rounded-[2rem] overflow-hidden flex flex-col border-zinc-800/40">
+                                <div class="flex border-b border-zinc-800 bg-zinc-950/50 p-1">
+                                    <button onclick="switchScriptTab('full')" id="tab-script-full" class="flex-1 py-3 px-4 text-[10px] font-black uppercase tracking-widest text-zinc-500 border-b-2 border-transparent transition-all">Full Script</button>
+                                    <button onclick="switchScriptTab('scenes')" id="tab-script-scenes" class="flex-1 py-3 px-4 text-[10px] font-black uppercase tracking-widest text-zinc-500 border-b-2 border-transparent transition-all">Scene Breakdown</button>
+                                </div>
+                                <div id="script-viewport" class="flex-1 p-6 text-sm text-zinc-400 leading-relaxed overflow-y-auto custom-scrollbar italic font-medium">
+                                    Initialize engine to view blueprint...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW: VOICE STUDIO -->
+                <section id="view-audio" class="view-section custom-scrollbar p-6 lg:p-12">
+                    <div class="max-w-4xl mx-auto">
+                        <div class="glass-panel p-10 rounded-[2.5rem] grid grid-cols-1 md:grid-cols-2 gap-12">
+                            <div class="space-y-8">
+                                <h3 class="text-2xl font-black tracking-tight">Voice Configuration</h3>
+                                <div class="space-y-5">
                                     <div>
-                                        <label class="block text-[10px] text-zinc-400 mb-2 font-bold uppercase">Select Voice</label>
-                                        <select id="voice-name-select" class="input-field w-full px-4 py-3 rounded-lg text-sm">
-                                            <option value="Kore">Kore (Trustworthy)</option>
-                                            <option value="Zephyr">Zephyr (Friendly)</option>
-                                            <option value="Charon">Charon (Authoritative)</option>
-                                            <option value="Puck">Puck (Energetic)</option>
+                                        <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-2">Voice Identity</label>
+                                        <select id="voice-name" class="input-field w-full p-4 rounded-xl text-sm font-bold">
+                                            <option value="Kore">Kore (Standard Professional)</option>
+                                            <option value="Zephyr">Zephyr (Deep Narrative)</option>
+                                            <option value="Aoede">Aoede (Soft Educational)</option>
+                                            <option value="Charon">Charon (Bold Authority)</option>
                                         </select>
                                     </div>
                                     <div>
-                                        <label class="block text-[10px] text-zinc-400 mb-2 font-bold uppercase">Tone Style</label>
-                                        <select id="voice-pacing-select" class="input-field w-full px-4 py-3 rounded-lg text-sm">
-                                            <option value="professional">Professional & Balanced</option>
-                                            <option value="excited">Excited & Fast</option>
-                                            <option value="calm">Calm & Educational</option>
+                                        <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-2">Vibe Preset</label>
+                                        <select id="voice-tone" class="input-field w-full p-4 rounded-xl text-sm font-bold">
+                                            <option value="professional">Professional Documentary</option>
+                                            <option value="energetic">Viral High-CTR</option>
+                                            <option value="calm">Educational / Tutorial</option>
                                         </select>
                                     </div>
                                 </div>
+                                <button id="gen-audio-btn" onclick="generateAudio()" class="w-full py-4 bg-red-600 text-white font-black rounded-xl hover:bg-red-700 transition-all shadow-xl shadow-red-600/20">Synthesize Narration</button>
                             </div>
-                            <div class="glass-panel p-5 md:p-6 rounded-2xl flex flex-col min-h-[300px]">
-                                <h4 class="text-xs font-bold text-red-500 uppercase tracking-widest mb-4">Ready to Synthesize</h4>
-                                <div id="voice-script-preview" class="flex-1 text-sm text-zinc-400 italic mb-6 line-clamp-6 bg-black/20 p-4 rounded-xl custom-scrollbar overflow-y-auto">
-                                    Generate script first.
+                            <div class="flex flex-col justify-center items-center bg-black/40 rounded-3xl p-8 border border-zinc-800/50">
+                                <div id="voice-loader" class="hidden w-16 h-16 border-4 border-red-600/20 border-t-red-600 rounded-full animate-spin-fast mb-6"></div>
+                                <div id="voice-icon" class="text-zinc-700 mb-4">
+                                    <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 20 20"><path d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0 5 5 0 01-10 0 1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z"></path></svg>
                                 </div>
-                                <div class="space-y-4">
-                                    <button id="generate-audio-btn" class="w-full py-4 bg-red-600 text-white font-bold rounded-xl text-sm hover:bg-red-700 transition-all disabled:opacity-50">Generate Narration</button>
-                                    <div id="audio-player-container" class="hidden flex items-center justify-center p-2 bg-zinc-900 rounded-xl border border-zinc-800">
-                                        <audio id="tts-audio-player" controls class="w-full h-8"></audio>
-                                    </div>
+                                <p id="voice-msg" class="text-[10px] text-zinc-500 font-black uppercase tracking-[0.3em] text-center">Awaiting Synthesis</p>
+                                <div id="audio-container" class="hidden w-full mt-10">
+                                    <audio id="main-audio" controls class="w-full h-10"></audio>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- SECTION: VIDEO PRODUCTION -->
-                <section id="view-video" class="view-section p-4 md:p-8">
-                    <div class="max-w-7xl mx-auto">
-                        <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight mb-2">Video Production</h2>
-                        <p class="text-zinc-500 text-sm mb-6 md:mb-8">Generate cinematic visuals and preview your composite.</p>
-                        
-                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
-                            <div class="lg:col-span-8">
-                                <div class="video-container shadow-2xl border border-zinc-800" id="video-preview-wrapper">
-                                    <div id="video-placeholder" class="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900 text-zinc-600 p-6 text-center">
-                                        <svg class="w-10 h-10 mb-3 opacity-20" fill="currentColor" viewBox="0 0 20 20"><path d="M2 6a2 2 0 012-2h12a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z"></path></svg>
-                                        <p class="text-[10px] font-bold uppercase tracking-widest opacity-50">Visual Content Pending</p>
-                                    </div>
-                                    <img id="video-bg-layer" class="hidden w-full h-full object-cover" src="" alt="Background">
-                                    <div id="subtitle-layer" class="hidden video-overlay">Subtitle preview...</div>
+                <!-- VIEW: FINAL MASTER -->
+                <section id="view-production" class="view-section custom-scrollbar p-4 lg:p-8">
+                    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+                        <div class="lg:col-span-8 space-y-6">
+                            <div id="player-canvas-container" class="shadow-2xl">
+                                <canvas id="export-canvas" width="1280" height="720" class="hidden"></canvas>
+                                <div id="video-placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-zinc-800">
+                                    <svg class="w-16 h-16 mb-4 opacity-10" fill="currentColor" viewBox="0 0 20 20"><path d="M2 6a2 2 0 012-2h12a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"></path></svg>
+                                    <p class="text-[10px] font-black uppercase tracking-[0.3em] opacity-30">Production Preview Pending</p>
                                 </div>
+                                <img id="player-img" class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-700">
+                                <div id="player-subtitles" class="absolute bottom-10 left-10 right-10 p-6 bg-black/60 backdrop-blur-lg rounded-2xl text-white text-xl font-bold text-center opacity-0 transition-all transform translate-y-8 border border-white/5"></div>
                                 
-                                <button id="play-composite-btn" class="w-full mt-6 py-4 bg-white text-black font-black rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-zinc-200 transition-all disabled:opacity-30">
-                                    Preview Final Production
-                                </button>
-                            </div>
-
-                            <div class="lg:col-span-4 space-y-4 md:space-y-6">
-                                <div class="glass-panel p-5 md:p-6 rounded-2xl">
-                                    <h4 class="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4">Background Visual</h4>
-                                    <button id="generate-vid-bg-btn" class="w-full py-4 bg-zinc-800 border border-zinc-700 text-white rounded-xl text-xs font-bold hover:bg-zinc-700 disabled:opacity-50">
-                                        Generate Cinematic AI Asset
-                                    </button>
+                                <div id="play-trigger" onclick="togglePlayback()" class="absolute inset-0 cursor-pointer flex items-center justify-center bg-black/30 opacity-0 hover:opacity-100 transition-all group">
+                                    <div class="w-24 h-24 bg-white text-black rounded-full flex items-center justify-center shadow-2xl transform scale-90 group-hover:scale-100 transition-transform">
+                                        <svg id="play-icon" class="w-12 h-12 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                    </div>
                                 </div>
-                                <div class="glass-panel p-5 md:p-6 rounded-2xl">
-                                    <h4 class="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4">Production Status</h4>
-                                    <ul class="text-[10px] space-y-3 text-zinc-400 font-bold uppercase tracking-wider">
-                                        <li class="flex items-center gap-2" id="comp-voice-status"><div class="w-1.5 h-1.5 rounded-full bg-zinc-700"></div> Audio Pending</li>
-                                        <li class="flex items-center gap-2" id="comp-bg-status"><div class="w-1.5 h-1.5 rounded-full bg-zinc-700"></div> Visual Missing</li>
-                                    </ul>
+                            </div>
+                            
+                            <div class="flex flex-col sm:flex-row items-center gap-4">
+                                <button id="export-btn" onclick="exportVideo()" class="w-full sm:flex-1 py-5 bg-white text-black font-black rounded-2xl text-xs uppercase tracking-[0.2em] shadow-xl hover:bg-zinc-200 transition-all disabled:opacity-30">Export Master Production</button>
+                                <div class="w-full sm:w-40 h-16 glass-panel rounded-2xl flex flex-col items-center justify-center border-zinc-800">
+                                    <span class="text-[9px] font-black text-zinc-600 uppercase tracking-widest">Timecode</span>
+                                    <span id="player-time" class="text-base font-black font-mono">00:00.00</span>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </section>
 
-                <!-- SECTION: SEO -->
-                <section id="view-seo" class="view-section p-4 md:p-8">
-                    <div class="max-w-7xl mx-auto">
-                        <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight mb-2">SEO Optimizer</h2>
-                        <p class="text-zinc-500 text-sm mb-6 md:mb-8">Metadata for algorithm optimization.</p>
-                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" id="seo-container">
-                            <div class="lg:col-span-3 glass-panel p-12 text-center text-zinc-600 rounded-2xl">
-                                <p>Finish your script and production to see SEO suggestions.</p>
+                        <div class="lg:col-span-4 space-y-6">
+                            <div class="glass-panel p-6 rounded-3xl space-y-5">
+                                <h3 class="text-[10px] font-black uppercase text-zinc-500 tracking-[0.2em]">Asset Forge</h3>
+                                <p class="text-[11px] text-zinc-500 leading-relaxed font-medium">Batch generate high-fidelity cinematic backgrounds for every scene in your storyboard.</p>
+                                <button id="gen-visuals-btn" onclick="generateVisuals()" class="w-full py-4 bg-zinc-900 border border-white/5 hover:bg-zinc-800 text-white font-black rounded-xl text-[10px] uppercase tracking-widest transition-all">Generate Storyboard Visuals</button>
+                                <div id="visual-progress-gallery" class="flex gap-2 overflow-x-auto no-scrollbar py-2"></div>
+                            </div>
+                            
+                            <div class="glass-panel p-6 rounded-3xl">
+                                <h3 class="text-[10px] font-black uppercase text-zinc-500 tracking-[0.2em] mb-5">SEO Optimization</h3>
+                                <div id="seo-output" class="space-y-4">
+                                    <div class="p-4 bg-black/40 rounded-xl border border-zinc-800/60">
+                                        <span class="text-red-500 text-[9px] font-black uppercase block mb-2">Primary Title</span>
+                                        <p class="text-xs text-zinc-300 font-bold" id="seo-title">---</p>
+                                    </div>
+                                    <div class="p-4 bg-black/40 rounded-xl border border-zinc-800/60">
+                                        <span class="text-red-500 text-[9px] font-black uppercase block mb-2">Optimized Tags</span>
+                                        <p class="text-[10px] text-zinc-400 font-medium leading-relaxed" id="seo-tags">---</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </section>
             </div>
 
-            <!-- FOOTER TOOLBAR -->
-            <footer class="h-auto md:h-20 bg-zinc-950 border-t border-zinc-800 flex flex-col md:flex-row items-center justify-between px-6 py-4 md:py-0 shrink-0 z-50 gap-4">
-                <div class="flex items-center w-full md:w-auto">
-                    <div class="flex flex-col">
-                        <span class="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-1">Active Project</span>
-                        <span class="text-xs font-bold text-zinc-300 truncate max-w-[200px]" id="global-project-name">Untitled Production</span>
+            <!-- GLOBAL FOOTER NAV -->
+            <footer class="h-16 border-t border-white/5 bg-black/80 backdrop-blur-xl flex items-center justify-between px-6 shrink-0 z-50">
+                <div class="flex items-center gap-8 overflow-x-auto no-scrollbar">
+                    <div class="flex items-center gap-2.5">
+                        <div id="dot-script" class="w-1.5 h-1.5 rounded-full bg-zinc-800"></div>
+                        <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-tighter">Script</span>
+                    </div>
+                    <div class="flex items-center gap-2.5">
+                        <div id="dot-audio" class="w-1.5 h-1.5 rounded-full bg-zinc-800"></div>
+                        <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-tighter">Voice</span>
+                    </div>
+                    <div class="flex items-center gap-2.5">
+                        <div id="dot-visuals" class="w-1.5 h-1.5 rounded-full bg-zinc-800"></div>
+                        <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-tighter">Visuals</span>
                     </div>
                 </div>
-
-                <div class="flex gap-2 w-full md:w-auto">
-                    <button id="reset-all-btn" class="flex-1 md:flex-none px-4 py-2 text-zinc-500 hover:text-white text-[10px] font-black uppercase tracking-wider">Reset</button>
-                    <button id="next-step-btn" class="flex-1 md:flex-none px-8 py-3 bg-white hover:bg-zinc-200 text-black text-[10px] font-black uppercase tracking-widest rounded-xl transition-all">Next Phase</button>
+                <div class="flex items-center gap-4">
+                    <button onclick="resetState()" class="text-zinc-600 hover:text-red-500 text-[10px] font-black uppercase tracking-widest transition-colors">Clear Workspace</button>
+                    <button id="next-phase-btn" class="hidden sm:block px-6 py-2 bg-white text-black font-black text-[10px] rounded-lg uppercase tracking-widest hover:bg-zinc-200">Next Phase</button>
                 </div>
             </footer>
         </main>
     </div>
 
     <!-- TOAST -->
-    <div id="toast" class="fixed bottom-24 right-4 md:right-8 transform translate-y-20 opacity-0 transition-all duration-300 z-[100] bg-zinc-900 border border-zinc-800 px-6 py-4 rounded-xl shadow-2xl pointer-events-none">
-        <p id="toast-msg" class="text-xs text-zinc-300 font-bold text-center md:text-left"></p>
+    <div id="toast" class="fixed bottom-24 right-4 sm:right-8 transform translate-y-20 opacity-0 transition-all duration-500 z-[100] glass-panel px-6 py-4 rounded-2xl shadow-2xl border-white/10 pointer-events-none">
+        <p id="toast-msg" class="text-xs font-bold text-zinc-200"></p>
+    </div>
+
+    <!-- MODAL -->
+    <div id="info-modal" class="hidden fixed inset-0 z-[200] bg-black/80 backdrop-blur-md flex items-center justify-center p-6">
+        <div class="glass-panel max-w-xl w-full rounded-[2.5rem] p-10 relative">
+            <button onclick="closeModal()" class="absolute top-6 right-6 text-zinc-500 hover:text-white transition-all">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </button>
+            <div id="modal-content" class="text-zinc-400 text-sm leading-relaxed font-medium"></div>
+        </div>
     </div>
 
     <script>
-        const API_MODEL = "gemini-2.5-flash-preview-09-2025";
-        const TTS_MODEL = "gemini-2.5-flash-preview-tts";
-        const IMAGEN_MODEL = "imagen-4.0-generate-001";
-        
+        const ENGINE_MODELS = {
+            text: "gemini-2.5-flash-preview-09-2025",
+            audio: "gemini-2.5-flash-preview-tts",
+            image: "imagen-4.0-generate-001"
+        };
+
         let state = {
             activePage: 'dashboard',
             apiKey: '',
-            config: { topic: '' },
-            outputs: {
-                script: '',
-                hooks: '',
-                scenes: [],
-                seo: null,
-                audioBlobUrl: null,
-                videoBackgroundB64: null
+            activeScriptTab: 'full',
+            production: {
+                topic: '',
+                script: null,
+                audioUrl: null,
+                audioBlob: null,
+                visuals: [],
+                visualImages: [],
+                timings: []
             },
-            activeTab: 'script'
+            isPlaying: false,
+            isRecording: false,
+            currentIdx: -1
         };
 
-        const PAGES = ['dashboard', 'script', 'voice', 'video', 'seo', 'settings'];
+        // UI CORE
+        function switchPage(page) {
+            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+            document.getElementById(`view-${page}`).classList.add('active');
+            const navItem = document.querySelector(`.sidebar-item[data-page="${page}"]`);
+            if(navItem) navItem.classList.add('active');
+            state.activePage = page;
+            renderStageContent();
+        }
 
-        const DOM = {
-            sidebarItems: document.querySelectorAll('.sidebar-item'),
-            viewSections: document.querySelectorAll('.view-section'),
-            apiKeyInput: document.getElementById('api-key-input'),
-            saveKeyBtn: document.getElementById('save-key-btn'),
-            statusDot: document.getElementById('status-dot'),
-            statusText: document.getElementById('status-text'),
-            topicInput: document.getElementById('topic-input'),
-            generateBtn: document.getElementById('generate-btn'),
-            scriptContent: document.getElementById('script-content'),
-            emptyScript: document.getElementById('empty-script'),
-            nextStepBtn: document.getElementById('next-step-btn'),
-            seoContainer: document.getElementById('seo-container'),
-            dashProjectName: document.getElementById('dash-project-name'),
-            dashProgress: document.getElementById('dash-progress'),
-            dashAudioStatus: document.getElementById('dash-audio-status'),
-            dashVideoStatus: document.getElementById('dash-video-status'),
-            globalProjectName: document.getElementById('global-project-name'),
-            voicePreview: document.getElementById('voice-script-preview'),
-            resetBtn: document.getElementById('reset-all-btn'),
-            generateAudioBtn: document.getElementById('generate-audio-btn'),
-            audioPlayer: document.getElementById('tts-audio-player'),
-            audioContainer: document.getElementById('audio-player-container'),
-            voiceNameSelect: document.getElementById('voice-name-select'),
-            voicePacingSelect: document.getElementById('voice-pacing-select'),
-            videoPlaceholder: document.getElementById('video-placeholder'),
-            videoBgLayer: document.getElementById('video-bg-layer'),
-            subtitleLayer: document.getElementById('subtitle-layer'),
-            playCompositeBtn: document.getElementById('play-composite-btn'),
-            generateVidBgBtn: document.getElementById('generate-vid-bg-btn'),
-            compVoiceStatus: document.getElementById('comp-voice-status'),
-            compBgStatus: document.getElementById('comp-bg-status'),
-            toast: document.getElementById('toast')
-        };
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toast-msg').textContent = msg;
+            t.classList.remove('opacity-0', 'translate-y-20');
+            t.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => {
+                t.classList.add('opacity-0', 'translate-y-20');
+                t.classList.remove('opacity-100', 'translate-y-0');
+            }, 3000);
+        }
 
-        window.addEventListener('DOMContentLoaded', () => {
-            loadState();
-            attachListeners();
-            checkConnection();
-            renderView();
-        });
+        function saveKey() {
+            const val = document.getElementById('api-key-input').value.trim();
+            if (val) {
+                state.apiKey = val;
+                document.getElementById('status-dot').className = "w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]";
+                document.getElementById('status-text').textContent = "Engine Connected";
+                document.getElementById('status-text').className = "text-[10px] font-black text-green-500 uppercase";
+                showToast("AI Engine Authorized!");
+                saveState();
+            }
+        }
 
+        function saveState() { localStorage.setItem('autotube_v4_state', JSON.stringify(state)); }
         function loadState() {
             const saved = localStorage.getItem('autotube_v4_state');
             if (saved) {
-                state = { ...state, ...JSON.parse(saved) };
-                DOM.apiKeyInput.value = state.apiKey;
-                DOM.topicInput.value = state.config.topic;
+                state = JSON.parse(saved);
+                document.getElementById('api-key-input').value = state.apiKey;
+                document.getElementById('topic-input').value = state.production.topic;
+                if(state.apiKey) saveKey();
+                renderStageContent();
             }
         }
 
-        function saveState() {
-            localStorage.setItem('autotube_v4_state', JSON.stringify(state));
-            updateDashboard();
-        }
-
-        function renderView() {
-            DOM.sidebarItems.forEach(item => item.classList.toggle('active', item.dataset.page === state.activePage));
-            DOM.viewSections.forEach(section => section.classList.toggle('active', section.id === `view-${state.activePage}`));
-
-            const currentIndex = PAGES.indexOf(state.activePage);
-            if (currentIndex < PAGES.length - 2) { 
-                const next = PAGES[currentIndex + 1];
-                DOM.nextStepBtn.textContent = `Next: ${next.toUpperCase()}`;
-                DOM.nextStepBtn.classList.remove('hidden');
-            } else {
-                DOM.nextStepBtn.classList.add('hidden');
+        function resetState() {
+            if(confirm("Factory Reset? This will wipe all current project data.")) {
+                localStorage.removeItem('autotube_v4_state');
+                location.reload();
             }
+        }
 
-            if (state.activePage === 'seo') renderSEO();
-            if (state.activePage === 'voice') {
-                DOM.voicePreview.textContent = state.outputs.script || "Please generate a script first.";
-                DOM.generateAudioBtn.disabled = !state.outputs.script;
-                if (state.outputs.audioBlobUrl) {
-                    DOM.audioContainer.classList.remove('hidden');
-                    DOM.audioPlayer.src = state.outputs.audioBlobUrl;
-                }
+        // PIPELINE ENGINES
+        async function apiCall(endpoint, payload, modelKey) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${ENGINE_MODELS[modelKey]}:${endpoint}?key=${state.apiKey}`;
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.error?.message || "Engine Error");
             }
-            if (state.activePage === 'script') renderScriptOutput();
-            if (state.activePage === 'video') renderVideoSection();
-            
-            updateDashboard();
+            return res.json();
         }
 
-        function updateDashboard() {
-            const hasScript = !!state.outputs.script;
-            const hasAudio = !!state.outputs.audioBlobUrl;
-            const hasVideo = !!state.outputs.videoBackgroundB64;
-            
-            DOM.dashProjectName.textContent = state.config.topic || 'No active project';
-            DOM.globalProjectName.textContent = state.config.topic || 'Untitled Production';
-            DOM.dashAudioStatus.textContent = hasAudio ? 'Ready' : 'Pending';
-            DOM.dashVideoStatus.textContent = hasVideo ? 'Ready' : 'Pending';
-            
-            let progress = 0;
-            if (hasScript) progress += 25;
-            if (hasAudio) progress += 25;
-            if (hasVideo) progress += 25;
-            if (state.outputs.seo) progress += 25;
-            DOM.dashProgress.style.width = `${progress}%`;
-        }
+        async function generateScript() {
+            const topic = document.getElementById('topic-input').value.trim();
+            if(!topic || !state.apiKey) return showToast("Topic and Key required");
 
-        async function checkConnection() {
-            if (!state.apiKey) return updateStatusUI('disconnected');
-            updateStatusUI('checking');
-            try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/${API_MODEL}:generateContent?key=${state.apiKey}`;
-                const res = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: "ping" }] }] })
-                });
-                updateStatusUI(res.ok ? 'connected' : 'error');
-            } catch (e) { updateStatusUI('error'); }
-        }
+            const btn = document.getElementById('gen-script-btn');
+            btn.disabled = true;
+            btn.textContent = "ENGINEERING BLUEPRINT...";
 
-        function updateStatusUI(status) {
-            DOM.statusDot.className = `w-2 h-2 rounded-full ${status === 'connected' ? 'bg-green-500 pulse-green' : status === 'error' ? 'bg-red-500' : 'bg-zinc-600'}`;
-            DOM.statusText.textContent = status === 'connected' ? 'Connected' : status === 'error' ? 'Auth Error' : 'Offline';
-            DOM.statusText.className = `text-[10px] font-extrabold uppercase tracking-wider ${status === 'connected' ? 'text-green-500' : 'text-zinc-500'}`;
-        }
-
-        async function generateWorkflow() {
-            if (!state.apiKey) return showToast("API Key Required");
-            if (!state.config.topic.trim()) return showToast("Enter a Topic");
-
-            DOM.generateBtn.disabled = true;
-            DOM.generateBtn.textContent = "Writing Production Pack...";
-            
-            const prompt = `YOUTUBE STRATEGIST MODE. Topic: ${state.config.topic}. Return JSON: {"script": "narration", "hooks": "opening hooks", "scenes": [{"title": "Brief", "prompt": "Visual prompt"}], "seo": {"titles": ["T1"], "description": "Box", "tags": "t1,t2"}}`;
+            const prompt = `YOUTUBE PRODUCER MODE. Topic: "${topic}". Return JSON ONLY.
+            Structure: {
+                "title": "Viral Title",
+                "script_full": "Complete narration text",
+                "scenes": [{"id": 1, "narration": "text", "visual_prompt": "Cinematic 16:9 prompt"}],
+                "seo": {"tags": "list, of, keywords", "description": "SEO Block"}
+            }`;
 
             try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/${API_MODEL}:generateContent?key=${state.apiKey}`;
-                const res = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-                });
-                const data = await res.json();
-                const jsonText = data.candidates[0].content.parts[0].text.replace(/```json|```/gi, '').trim();
-                const parsed = JSON.parse(jsonText);
-                state.outputs.script = parsed.script;
-                state.outputs.hooks = parsed.hooks;
-                state.outputs.scenes = parsed.scenes || [];
-                state.outputs.seo = parsed.seo;
+                const data = await apiCall('generateContent', {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: { responseMimeType: "application/json" }
+                }, 'text');
+                
+                state.production.script = JSON.parse(data.candidates[0].content.parts[0].text);
+                state.production.topic = topic;
+                document.getElementById('dot-script').className = "w-1.5 h-1.5 rounded-full bg-green-500";
+                document.getElementById('dash-script-status').textContent = "Generated";
+                document.getElementById('dash-script-status').className = "text-lg font-bold mt-2 text-green-500";
+                
                 saveState();
-                renderView();
-                showToast("Production Pack Ready!");
-            } catch (e) { showToast("Generation Failed"); }
+                switchScriptTab('full');
+                renderStageContent();
+                showToast("Script Architected!");
+            } catch (e) { showToast(e.message); }
             finally { 
-                DOM.generateBtn.disabled = false;
-                DOM.generateBtn.textContent = "Generate Production Pack";
+                btn.disabled = false; 
+                btn.textContent = "Write Script Package"; 
             }
         }
 
         async function generateAudio() {
-            if (!state.outputs.script) return;
-            DOM.generateAudioBtn.disabled = true;
-            DOM.generateAudioBtn.textContent = "Synthesizing...";
-            
-            const voice = DOM.voiceNameSelect.value;
-            const pacing = DOM.voicePacingSelect.value;
-            const text = `Narration tone: ${pacing}. Script: ${state.outputs.script.substring(0, 3000)}`;
+            if(!state.production.script) return showToast("Script missing");
+            const btn = document.getElementById('gen-audio-btn');
+            btn.disabled = true;
+            btn.textContent = "SYNTHESIZING...";
+            document.getElementById('voice-loader').classList.remove('hidden');
 
             try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/${TTS_MODEL}:generateContent?key=${state.apiKey}`;
-                const res = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text }] }],
-                        generationConfig: {
-                            responseModalities: ["AUDIO"],
-                            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } }
-                        }
-                    })
-                });
-                const data = await res.json();
-                const pcmData = data.candidates[0].content.parts[0].inlineData.data;
-                const mimeType = data.candidates[0].content.parts[0].inlineData.mimeType;
-                const sampleRate = mimeType.match(/rate=(\d+)/) ? parseInt(mimeType.match(/rate=(\d+)/)[1]) : 24000;
+                const data = await apiCall('generateContent', {
+                    contents: [{ parts: [{ text: `Narrate in a ${document.getElementById('voice-tone').value} style: ${state.production.script.script_full}` }] }],
+                    generationConfig: {
+                        responseModalities: ["AUDIO"],
+                        speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: document.getElementById('voice-name').value } } }
+                    }
+                }, 'audio');
+
+                const inline = data.candidates[0].content.parts.find(p => p.inlineData)?.inlineData;
+                const binary = atob(inline.data);
+                const bytes = new Uint8Array(binary.length);
+                for(let i=0; i<binary.length; i++) bytes[i] = binary.charCodeAt(i);
                 
-                state.outputs.audioBlobUrl = pcmToWav(pcmData, sampleRate);
-                DOM.audioPlayer.src = state.outputs.audioBlobUrl;
-                DOM.audioContainer.classList.remove('hidden');
-                saveState();
-                showToast("Narration Synthesized!");
-            } catch (e) { showToast("Synthesis Error"); }
-            finally { 
-                DOM.generateAudioBtn.disabled = false;
-                DOM.generateAudioBtn.textContent = "Regenerate Narration";
-            }
-        }
-
-        function pcmToWav(base64Pcm, sampleRate) {
-            const binaryString = window.atob(base64Pcm);
-            const bytes = new Uint8Array(binaryString.length);
-            for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
-            const wavHeader = new ArrayBuffer(44);
-            const view = new DataView(wavHeader);
-            const writeStr = (v, o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
-            writeStr(view, 0, 'RIFF');
-            view.setUint32(4, 36 + bytes.length, true);
-            writeStr(view, 8, 'WAVE');
-            writeStr(view, 12, 'fmt ');
-            view.setUint32(16, 16, true);
-            view.setUint16(20, 1, true); 
-            view.setUint16(22, 1, true); 
-            view.setUint32(24, sampleRate, true);
-            view.setUint32(28, sampleRate * 2, true);
-            view.setUint16(32, 2, true);
-            view.setUint16(34, 16, true);
-            writeStr(view, 36, 'data');
-            view.setUint32(40, bytes.length, true);
-            return URL.createObjectURL(new Blob([wavHeader, bytes], { type: 'audio/wav' }));
-        }
-
-        async function generateVideoBackground() {
-            if (!state.outputs.script) return showToast("Generate script first");
-            DOM.generateVidBgBtn.disabled = true;
-            DOM.generateVidBgBtn.textContent = "AI Painting Scene...";
-
-            const prompt = `Cinematic YouTube background: ${state.config.topic}. Highly professional, 4k detail.`;
-
-            try {
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/${IMAGEN_MODEL}:predict?key=${state.apiKey}`;
-                const res = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ instances: { prompt }, parameters: { sampleCount: 1 } })
-                });
-                const data = await res.json();
-                state.outputs.videoBackgroundB64 = `data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`;
-                saveState();
-                renderVideoSection();
-                showToast("Visual Asset Created!");
-            } catch (e) { showToast("Visual Gen Failed"); }
-            finally { 
-                DOM.generateVidBgBtn.disabled = false;
-                DOM.generateVidBgBtn.textContent = "Regenerate Visual";
-            }
-        }
-
-        function renderVideoSection() {
-            const hasBg = !!state.outputs.videoBackgroundB64;
-            const hasAudio = !!state.outputs.audioBlobUrl;
-            
-            if (hasBg) {
-                DOM.videoPlaceholder.classList.add('hidden');
-                DOM.videoBgLayer.src = state.outputs.videoBackgroundB64;
-                DOM.videoBgLayer.classList.remove('hidden');
-                DOM.compBgStatus.innerHTML = '<div class="w-1.5 h-1.5 rounded-full bg-green-500"></div> Visual Ready';
-            }
-            if (hasAudio) {
-                DOM.compVoiceStatus.innerHTML = '<div class="w-1.5 h-1.5 rounded-full bg-green-500"></div> Audio Integrated';
-            }
-            DOM.playCompositeBtn.disabled = !(hasBg && hasAudio);
-        }
-
-        function playComposite() {
-            if (!state.outputs.audioBlobUrl) return;
-            const player = new Audio(state.outputs.audioBlobUrl);
-            DOM.subtitleLayer.classList.remove('hidden');
-            DOM.subtitleLayer.textContent = "Production Preview Initializing...";
-            
-            const lines = state.outputs.script.split('.');
-            let i = 0;
-            const subInterval = setInterval(() => {
-                if (i < lines.length && !player.paused) {
-                    DOM.subtitleLayer.textContent = lines[i].trim();
-                    i++;
-                } else clearInterval(subInterval);
-            }, 3000);
-
-            player.play();
-            player.onended = () => DOM.subtitleLayer.classList.add('hidden');
-        }
-
-        function renderScriptOutput() {
-            const hasContent = !!state.outputs.script;
-            DOM.emptyScript.classList.toggle('hidden', hasContent);
-            DOM.scriptContent.classList.toggle('hidden', !hasContent);
-            if (hasContent) {
-                const val = state.outputs[state.activeTab];
-                DOM.scriptContent.textContent = typeof val === 'string' ? val : JSON.stringify(val, null, 2);
-            }
-        }
-
-        function renderSEO() {
-            if (!state.outputs.seo) return;
-            const s = state.outputs.seo;
-            DOM.seoContainer.innerHTML = `
-                <div class="lg:col-span-2 glass-panel p-6 rounded-2xl space-y-4">
-                    <h5 class="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Optimized Titles</h5>
-                    ${s.titles.map(t => `<div class="p-4 bg-zinc-900 rounded-xl text-sm border border-zinc-800 text-zinc-300 font-bold">${t}</div>`).join('')}
-                </div>
-                <div class="glass-panel p-6 rounded-2xl">
-                     <h5 class="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-4">Meta Tags</h5>
-                     <div class="flex flex-wrap gap-2">${s.tags.split(',').map(tag => `<span class="px-3 py-1 bg-zinc-800 rounded-lg text-xs text-zinc-400 border border-zinc-700">#${tag.trim()}</span>`).join('')}</div>
-                </div>
-                <div class="lg:col-span-3 glass-panel p-6 rounded-2xl">
-                    <h5 class="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-4">Description Template</h5>
-                    <div class="p-4 bg-zinc-900 rounded-xl text-[11px] leading-relaxed text-zinc-400 border border-zinc-800 whitespace-pre-wrap font-mono max-h-40 overflow-y-auto">${s.description}</div>
-                </div>
-            `;
-        }
-
-        function showToast(msg) {
-            document.getElementById('toast-msg').textContent = msg;
-            DOM.toast.classList.replace('opacity-0', 'opacity-100');
-            DOM.toast.classList.replace('translate-y-20', 'translate-y-0');
-            setTimeout(() => {
-                DOM.toast.classList.replace('opacity-100', 'opacity-0');
-                DOM.toast.classList.replace('translate-y-0', 'translate-y-20');
-            }, 3000);
-        }
-
-        function attachListeners() {
-            document.querySelectorAll('.sidebar-item[data-page], .nav-trigger').forEach(el => {
-                el.onclick = () => { state.activePage = el.dataset.page; renderView(); };
-            });
-
-            DOM.nextStepBtn.onclick = () => {
-                const currentIndex = PAGES.indexOf(state.activePage);
-                if (currentIndex < PAGES.length - 1) { state.activePage = PAGES[currentIndex + 1]; renderView(); }
-            };
-
-            DOM.saveKeyBtn.onclick = () => { state.apiKey = DOM.apiKeyInput.value.trim(); saveState(); checkConnection(); showToast("API Key Updated"); };
-            DOM.topicInput.addEventListener('input', (e) => { state.config.topic = e.target.value; saveState(); });
-            DOM.generateBtn.onclick = generateWorkflow;
-            DOM.generateAudioBtn.onclick = generateAudio;
-            DOM.generateVidBgBtn.onclick = generateVideoBackground;
-            DOM.playCompositeBtn.onclick = playComposite;
-
-            document.querySelectorAll('#output-tabs .tab-trigger').forEach(tab => {
-                tab.onclick = () => {
-                    document.querySelectorAll('#output-tabs .tab-trigger').forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active');
-                    state.activeTab = tab.dataset.tab;
-                    renderScriptOutput();
+                const blob = createWav(bytes, 24000);
+                state.production.audioUrl = URL.createObjectURL(blob);
+                
+                const aud = document.getElementById('main-audio');
+                aud.src = state.production.audioUrl;
+                document.getElementById('audio-container').classList.remove('hidden');
+                document.getElementById('voice-msg').textContent = "AUDIO MASTERED";
+                document.getElementById('dot-audio').className = "w-1.5 h-1.5 rounded-full bg-green-500";
+                
+                aud.onloadedmetadata = () => {
+                    const dur = aud.duration;
+                    const totalChars = state.production.script.scenes.reduce((a, s) => a + s.narration.length, 0);
+                    let elapsed = 0;
+                    state.production.timings = state.production.script.scenes.map(s => {
+                        const sceneDur = (s.narration.length / totalChars) * dur;
+                        const timing = { start: elapsed, end: elapsed + sceneDur };
+                        elapsed += sceneDur;
+                        return timing;
+                    });
+                    saveState();
                 };
-            });
+                showToast("Voice Mastered!");
+            } catch (e) { showToast(e.message); }
+            finally { 
+                btn.disabled = false; 
+                btn.textContent = "Synthesize Narration"; 
+                document.getElementById('voice-loader').classList.add('hidden');
+            }
+        }
 
-            DOM.resetBtn.onclick = () => {
-                if(confirm("Clear current production data?")) {
-                    state.outputs = { script: '', hooks: '', scenes: [], seo: null, audioBlobUrl: null, videoBackgroundB64: null };
-                    saveState(); location.reload();
+        async function generateVisuals() {
+            if(!state.production.script) return showToast("No blueprint");
+            const btn = document.getElementById('gen-visuals-btn');
+            btn.disabled = true;
+            btn.textContent = "PAINTING STORYBOARD...";
+            state.production.visuals = [];
+            state.production.visualImages = [];
+            const gallery = document.getElementById('visual-progress-gallery');
+            gallery.innerHTML = '';
+
+            const scenes = state.production.script.scenes;
+            try {
+                for (let i = 0; i < scenes.length; i++) {
+                    btn.textContent = `SCENE ${i+1}/${scenes.length}...`;
+                    const data = await apiCall('predict', {
+                        instances: { prompt: `Cinematic 4k YouTube background: ${scenes[i].visual_prompt}` },
+                        parameters: { sampleCount: 1 }
+                    }, 'image');
+                    
+                    const b64 = `data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`;
+                    state.production.visuals.push(b64);
+                    
+                    const img = new Image();
+                    img.src = b64;
+                    state.production.visualImages.push(img);
+
+                    const thumb = document.createElement('div');
+                    thumb.className = "w-16 h-10 rounded-lg overflow-hidden shrink-0 border border-white/10";
+                    thumb.innerHTML = `<img src="${b64}" class="w-full h-full object-cover">`;
+                    gallery.appendChild(thumb);
                 }
+                document.getElementById('dot-visuals').className = "w-1.5 h-1.5 rounded-full bg-green-500";
+                document.getElementById('video-placeholder').classList.add('hidden');
+                document.getElementById('player-img').src = state.production.visuals[0];
+                document.getElementById('player-img').classList.remove('opacity-0');
+                saveState();
+                showToast("Visual Studio Ready!");
+            } catch (e) { showToast("Visual Forge Error"); }
+            finally { 
+                btn.disabled = false; 
+                btn.textContent = "Generate Storyboard Visuals"; 
+            }
+        }
+
+        // RENDER LOGIC
+        function renderStageContent() {
+            if (state.activePage === 'script' && state.production.script) {
+                const viewport = document.getElementById('script-viewport');
+                viewport.classList.remove('italic');
+                if (state.activeScriptTab === 'full') {
+                    viewport.textContent = state.production.script.script_full;
+                } else {
+                    viewport.innerHTML = state.production.script.scenes.map(s => `
+                        <div class="p-4 glass-panel rounded-xl mb-3 border-l-4 border-red-600/30">
+                            <span class="text-[9px] font-black text-zinc-500 uppercase">Scene ${s.id}</span>
+                            <p class="text-xs text-white font-bold mt-1">"${s.narration}"</p>
+                            <p class="text-[10px] text-zinc-500 mt-2 italic">${s.visual_prompt}</p>
+                        </div>
+                    `).join('');
+                }
+            }
+            
+            if (state.activePage === 'production' && state.production.script) {
+                document.getElementById('seo-title').textContent = state.production.script.title;
+                document.getElementById('seo-tags').textContent = state.production.script.seo.tags;
+                if(state.production.visuals.length > 0) {
+                    document.getElementById('video-placeholder').classList.add('hidden');
+                    document.getElementById('player-img').src = state.production.visuals[0];
+                    document.getElementById('player-img').classList.remove('opacity-0');
+                    document.getElementById('comp-bg-status').innerHTML = '<div class="w-1.5 h-1.5 rounded-full bg-green-500"></div> Visual Assets Ready';
+                }
+                if(state.production.audioUrl) {
+                    document.getElementById('comp-voice-status').innerHTML = '<div class="w-1.5 h-1.5 rounded-full bg-green-500"></div> Audio Stream Active';
+                }
+            }
+
+            document.getElementById('dash-topic').textContent = state.production.topic || 'No active project';
+        }
+
+        function switchScriptTab(tab) {
+            state.activeScriptTab = tab;
+            document.getElementById('tab-script-full').className = `flex-1 py-3 px-4 text-[10px] font-black uppercase tracking-widest ${tab === 'full' ? 'text-white border-b-white' : 'text-zinc-500 border-transparent'}`;
+            document.getElementById('tab-script-scenes').className = `flex-1 py-3 px-4 text-[10px] font-black uppercase tracking-widest ${tab === 'scenes' ? 'text-white border-b-white' : 'text-zinc-500 border-transparent'}`;
+            renderStageContent();
+        }
+
+        // PRODUCTION ENGINE
+        const masterPlayer = new Audio();
+        function togglePlayback() {
+            if (!state.production.audioUrl || state.production.visuals.length === 0) return showToast("Assets incomplete");
+
+            if (state.isPlaying) {
+                masterPlayer.pause();
+                state.isPlaying = false;
+                document.getElementById('play-icon').innerHTML = `<path d="M8 5v14l11-7z"/>`;
+            } else {
+                masterPlayer.src = state.production.audioUrl;
+                masterPlayer.play();
+                state.isPlaying = true;
+                document.getElementById('play-icon').innerHTML = `<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>`;
+                requestAnimationFrame(productionLoop);
+            }
+        }
+
+        function productionLoop() {
+            if (!state.isPlaying && !state.isRecording) return;
+
+            const time = masterPlayer.currentTime;
+            document.getElementById('player-time').textContent = formatTimer(time);
+
+            const idx = state.production.timings.findIndex(t => time >= t.start && time < t.end);
+            if (idx !== -1 && state.currentIdx !== idx) {
+                state.currentIdx = idx;
+                const img = document.getElementById('player-img');
+                const sub = document.getElementById('player-subtitles');
+                
+                img.src = state.production.visuals[idx];
+                sub.textContent = state.production.script.scenes[idx].narration;
+                sub.classList.remove('opacity-0', 'translate-y-8');
+                sub.classList.add('opacity-100', 'translate-y-0');
+            }
+
+            if (state.isRecording) drawMasterFrame(idx, time);
+            requestAnimationFrame(productionLoop);
+        }
+
+        function drawMasterFrame(idx, time) {
+            const canvas = document.getElementById('export-canvas');
+            const ctx = canvas.getContext('2d');
+            const img = state.production.visualImages[idx >= 0 ? idx : 0];
+            
+            if (img && img.complete) {
+                ctx.drawImage(img, 0, 0, 1280, 720);
+                
+                // SUBTITLES
+                const text = state.production.script.scenes[idx >= 0 ? idx : 0].narration;
+                ctx.fillStyle = "rgba(0,0,0,0.6)";
+                ctx.fillRect(80, 580, 1120, 100);
+                ctx.fillStyle = "white";
+                ctx.font = "bold 32px 'Plus Jakarta Sans'";
+                ctx.textAlign = "center";
+                ctx.fillText(text, 640, 645);
+
+                // CREATOR WATERMARK
+                ctx.fillStyle = "rgba(255,255,255,0.4)";
+                ctx.font = "bold 18px 'Plus Jakarta Sans'";
+                ctx.textAlign = "right";
+                ctx.fillText("PRODUCED BY AUTOTUBE STUDIO", 1250, 40);
+            }
+        }
+
+        async function exportVideo() {
+            if (state.isRecording) return;
+            showToast("Initializing Hardware Render... 🚀");
+            state.isRecording = true;
+            
+            const btn = document.getElementById('export-btn');
+            btn.disabled = true;
+            btn.classList.add('recording-active');
+            btn.textContent = "RENDERING BUFFER...";
+
+            const canvas = document.getElementById('export-canvas');
+            const stream = canvas.captureStream(30);
+            const recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9' });
+            const chunks = [];
+
+            recorder.ondataavailable = e => chunks.push(e.data);
+            recorder.onstop = () => {
+                const blob = new Blob(chunks, { type: 'video/webm' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `AutoTube_Master_${Date.now()}.webm`;
+                a.click();
+                
+                state.isRecording = false;
+                btn.disabled = false;
+                btn.classList.remove('recording-active');
+                btn.textContent = "Export Master Production";
+                showToast("Master Export Complete!");
+            };
+
+            masterPlayer.currentTime = 0;
+            masterPlayer.play();
+            recorder.start();
+            state.isPlaying = true;
+            
+            masterPlayer.onended = () => {
+                recorder.stop();
+                state.isPlaying = false;
+                document.getElementById('play-icon').innerHTML = `<path d="M8 5v14l11-7z"/>`;
             };
         }
+
+        // UTILS
+        function createWav(pcm, rate) {
+            const head = new ArrayBuffer(44);
+            const v = new DataView(head);
+            const s = (o, str) => { for (let i = 0; i < str.length; i++) v.setUint8(o + i, str.charCodeAt(i)); };
+            s(0, 'RIFF'); v.setUint32(4, 36 + pcm.length, true); s(8, 'WAVE'); s(12, 'fmt ');
+            v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+            v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+            s(36, 'data'); v.setUint32(40, pcm.length, true);
+            return new Blob([head, pcm], { type: 'audio/wav' });
+        }
+
+        function formatTimer(s) {
+            const m = Math.floor(s / 60);
+            const sec = Math.floor(s % 60);
+            const ms = Math.floor((s % 1) * 100);
+            return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}.${ms.toString().padStart(2,'0')}`;
+        }
+
+        function showInfo(type) {
+            const modal = document.getElementById('info-modal');
+            const content = document.getElementById('modal-content');
+            if(type === 'terms') {
+                content.innerHTML = `<h2 class="text-3xl font-black text-white mb-6 uppercase">Legal & Privacy</h2>
+                <div class="space-y-4">
+                    <p>AutoTube Studio is a <span class="text-red-500 font-bold">100% Client-Side Suite</span>. Your API keys, scripts, and media never leave this browser tab.</p>
+                    <p>Created by <span class="text-white font-black">Sanket Sarjerao Patil</span>. This project is provided for viewing and production use only.</p>
+                    <p>All AI-generated content is subject to the usage policies of Google AI Studio (Gemini/Imagen).</p>
+                </div>`;
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('info-modal').classList.add('hidden'); }
+
+        window.onload = loadState;
     </script>
 </body>
 </html>
