@@ -1,8 +1,8 @@
-## AutoTube Studio v5.5
+# AutoTube Studio v5.5
 
 AutoTube Studio is a premium, AI-driven video production suite designed for full-scale YouTube automation. It allows creators to architect scripts, forge high-fidelity visuals, and synthesize natural narrations—all within a unified, browser-based ecosystem.
 
-## 🚀 Key Features
+# 🚀 Key Features
 
 Script Architect: Generates viral-ready production blueprints using advanced LLM logic.
 
@@ -14,13 +14,13 @@ Mastering Engine: A client-side rendering pipeline that encodes high-bitrate Web
 
 Secure Authentication: Integrated Google Cloud Gateway for safe user profile management and data isolation.
 
-## 🛡️ Access & Permissions
+# 🛡️ Access & Permissions
 
-# End-Users
+## End-Users
 
 Users have full permission to interact with the web interface to create and export video content. However, users do not have permission to access, modify, or distribute the source code of the AutoTube Studio Node.
 
-# Developer
+## Developer
 
 This project is developed, owned, and maintained exclusively by:
 Sanket Sarjerao Patil
@@ -37,8 +37,8 @@ Backend/Auth: Firebase Authentication & Firestore (Strict Pathing Architecture).
 
 Video Processing: MediaRecorder API with dynamic VP9/VP8 codec fallback.
 
-## 🔒 Privacy & Data
+# 🔒 Privacy & Data
 
 AutoTube Studio operates on a "Volatile Memory" principle. Production assets (images and audio blobs) are stored in local session memory and are purged upon a "Hard Reset" or session logout to ensure maximum user privacy.
 
-## Copyright © 2026 AutoTube Studio. Developed by Sanket Sarjerao Patil.
+# Copyright © 2026 AutoTube Studio. Developed by Sanket Sarjerao Patil.
