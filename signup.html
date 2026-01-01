@@ -117,6 +117,12 @@
             animation: spin 0.8s linear infinite; display: none;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .asset-thumb {
+            width: 60px; height: 34px; border-radius: 6px; background: #1a1a1e;
+            flex-shrink: 0; border: 1px solid rgba(255,255,255,0.05); overflow: hidden;
+        }
+        .asset-thumb.loading { border-color: var(--yt-red); animation: spin 2s linear infinite; }
     </style>
 </head>
 <body>
@@ -332,8 +338,17 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Global State & Firebase Config
-        const firebaseConfig = JSON.parse(__firebase_config);
+        // Firebase Configuration - Hardcoded project settings
+        const firebaseConfig = {
+            apiKey: "AIzaSyCQNE7k-29a7b4oDWZTuxfsZFgLMbysYf8",
+            authDomain: "autotube-studio-c701b.firebaseapp.com",
+            projectId: "autotube-studio-c701b",
+            storageBucket: "autotube-studio-c701b.firebasestorage.app",
+            messagingSenderId: "623512070446",
+            appId: "1:623512070446:web:4750b7daaa6c9898d9b2bf",
+            measurementId: "G-9ZEW2WEZ0H"
+        };
+
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'autotube-studio';
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -380,7 +395,7 @@
                 }
             } catch (error) {
                 console.error(error);
-                showMsg('Sign-in failed. Please try again.');
+                window.showMsg('Sign-in failed. Please try again.');
             } finally {
                 btnText.style.display = 'block';
                 btnSpinner.style.display = 'none';
@@ -389,7 +404,7 @@
         };
 
         window.handleLogout = async () => {
-            const ok = await customDialog("Sign Out", "All production progress in current session memory will be lost.", "Logout");
+            const ok = await window.customDialog("Sign Out", "All production progress in current session memory will be lost.", "Logout");
             if (ok) {
                 window.state.production.visuals.forEach(url => URL.revokeObjectURL(url));
                 sessionStorage.clear();
@@ -411,7 +426,7 @@
                     document.getElementById('user-photo').classList.remove('hidden');
                     document.getElementById('user-photo-placeholder').classList.add('hidden');
                 }
-                showMsg(`Welcome, ${user.displayName.split(' ')[0]}! Node Active.`);
+                window.showMsg(`Welcome, ${user.displayName.split(' ')[0]}! Node Active.`);
             } else {
                 authView.style.display = 'flex';
                 studioView.style.display = 'none';
@@ -442,7 +457,7 @@
 
         async function apiCall(model, endpoint, payload, retries = 5) {
             const key = window.state.apiKey;
-            if(!key) { showMsg("API Key Missing"); throw new Error("No Key"); }
+            if(!key) { window.showMsg("API Key Missing"); throw new Error("No Key"); }
             const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:${endpoint}?key=${key}`;
             for (let i = 0; i < retries; i++) {
                 try {
@@ -461,13 +476,13 @@
                 await apiCall('gemini-2.5-flash-preview-09-2025', 'generateContent', { contents: [{ parts: [{ text: "ping" }] }] });
                 document.getElementById('status-dot').className = "w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_10px_green]";
                 document.getElementById('status-text').textContent = "Handshake Ready";
-                showMsg("Secure AI Gateway Verified");
-            } catch (e) { showMsg("Gateway Check Failed"); }
+                window.showMsg("Secure AI Gateway Verified");
+            } catch (e) { window.showMsg("Gateway Check Failed"); }
         };
 
         window.generateScript = async () => {
             const topic = document.getElementById('topic-input').value.trim();
-            if(!topic) return showMsg("Input Idea");
+            if(!topic) return window.showMsg("Input Idea");
             const btn = document.getElementById('gen-script-btn');
             btn.disabled = true; btn.textContent = "Synthesizing...";
             const prompt = `Return valid JSON only. Topic: "${topic}". Structure: {"title": "Title", "full_text": "Narration", "scenes": [{"narration": "sentence", "prompt": "16:9 photo prompt"}], "seo": {"tags": "tags"}}.`;
@@ -477,14 +492,14 @@
                 window.state.production.blueprint = blueprint;
                 window.state.production.topic = topic;
                 document.getElementById('dot-script').className = "w-1.5 h-1.5 rounded-full bg-green-500";
-                renderView();
-                showMsg("Script Blueprint Constructed");
-            } catch (e) { showMsg("Architect Error"); }
+                window.renderView();
+                window.showMsg("Script Blueprint Constructed");
+            } catch (e) { window.showMsg("Architect Error"); }
             finally { btn.disabled = false; btn.textContent = "Construct Blueprint"; }
         };
 
         window.generateAudio = async () => {
-            if (!window.state.production.blueprint) return showMsg("No Blueprint");
+            if (!window.state.production.blueprint) return window.showMsg("No Blueprint");
             const btn = document.getElementById('gen-audio-btn');
             document.getElementById('voice-loader').classList.remove('hidden');
             document.getElementById('voice-placeholder').classList.add('hidden');
@@ -493,10 +508,13 @@
                 const lang = document.getElementById('target-language').value.trim();
                 if (lang) text = `Translate to ${lang} and narrate: ${text}`;
                 const data = await apiCall('gemini-2.5-flash-preview-tts', 'generateContent', { contents: [{ parts: [{ text: text }] }], generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: document.getElementById('voice-name').value } } } } });
-                const base64 = data.candidates[0].content.parts.find(p => p.inlineData).inlineData.data;
+                const inlinePart = data.candidates[0].content.parts.find(p => p.inlineData);
+                const base64 = inlinePart.inlineData.data;
                 const binary = atob(base64); const bytes = new Uint8Array(binary.length);
                 for(let i=0; i<binary.length; i++) bytes[i] = binary.charCodeAt(i);
-                window.state.production.audioUrl = URL.createObjectURL(new Blob([createWav(bytes, 24000)], {type: 'audio/wav'}));
+                
+                const wavData = createWav(bytes, 24000);
+                window.state.production.audioUrl = URL.createObjectURL(new Blob([wavData], {type: 'audio/wav'}));
                 masterAudio.src = window.state.production.audioUrl;
                 masterAudio.onloadedmetadata = () => {
                     const dur = masterAudio.duration;
@@ -506,14 +524,14 @@
                     window.state.production.timings = weights.map(w => { const sceneDur = (w / totalWeight) * dur; const t = { start: elapsed, end: elapsed + sceneDur }; elapsed += sceneDur; return t; });
                     document.getElementById('audio-container').classList.remove('hidden');
                     document.getElementById('dot-audio').className = "w-1.5 h-1.5 rounded-full bg-green-500";
-                    renderView();
+                    window.renderView();
                 };
-            } catch (e) { showMsg("Audio Synth Error"); }
+            } catch (e) { window.showMsg("Audio Synth Error"); }
             finally { document.getElementById('voice-loader').classList.add('hidden'); }
         };
 
         window.generateVisuals = async () => {
-            if (!window.state.production.blueprint) return showMsg("No Blueprint");
+            if (!window.state.production.blueprint) return window.showMsg("No Blueprint");
             const btn = document.getElementById('gen-visuals-btn');
             const gallery = document.getElementById('asset-progress');
             btn.disabled = true; gallery.innerHTML = '';
@@ -534,7 +552,7 @@
             }
             document.getElementById('dot-visuals').className = "w-1.5 h-1.5 rounded-full bg-green-500";
             btn.disabled = false; document.getElementById('video-placeholder').classList.add('hidden');
-            renderView();
+            window.renderView();
         };
 
         function drawFrame(idx, text = "") {
@@ -545,7 +563,15 @@
             const w = img.width * ratio; const h = img.height * ratio;
             mainCtx.drawImage(img, (1280 - w) / 2, (720 - h) / 2, w, h);
             if (text) {
-                mainCtx.fillStyle = "rgba(0,0,0,0.7)"; mainCtx.roundRect(140, 580, 1000, 100, 20); mainCtx.fill();
+                mainCtx.fillStyle = "rgba(0,0,0,0.7)";
+                // Helper to draw rounded rect manually if needed, or use native roundRect if supported
+                if (mainCtx.roundRect) {
+                    mainCtx.beginPath();
+                    mainCtx.roundRect(140, 580, 1000, 100, 20);
+                    mainCtx.fill();
+                } else {
+                    mainCtx.fillRect(140, 580, 1000, 100);
+                }
                 mainCtx.fillStyle = "white"; mainCtx.font = "bold 32px 'Plus Jakarta Sans'"; mainCtx.textAlign = "center";
                 mainCtx.fillText(text, 640, 640);
             }
@@ -568,12 +594,18 @@
                 drawFrame(idx, window.state.production.blueprint.scenes[idx].narration);
             }
             if (masterAudio.ended) window.state.isPlaying = false;
-            else requestAnimationFrame(renderLoop);
+            else if (window.state.isPlaying || window.state.isRecording) requestAnimationFrame(renderLoop);
         }
 
         window.exportMaster = async () => {
             if (window.state.isRecording || !window.state.production.images.length) return;
-            if (!audioCtx) { audioCtx = new AudioContext(); mediaDest = audioCtx.createMediaStreamDestination(); sourceNode = audioCtx.createMediaElementSource(masterAudio); sourceNode.connect(mediaDest); sourceNode.connect(audioCtx.destination); }
+            if (!audioCtx) {
+                audioCtx = new AudioContext();
+                mediaDest = audioCtx.createMediaStreamDestination();
+                sourceNode = audioCtx.createMediaElementSource(masterAudio);
+                sourceNode.connect(mediaDest);
+                sourceNode.connect(audioCtx.destination);
+            }
             window.state.isRecording = true;
             const recorder = new MediaRecorder(new MediaStream([...mainCanvas.captureStream(30).getVideoTracks(), ...mediaDest.stream.getAudioTracks()]), { mimeType: 'video/webm' });
             const chunks = []; recorder.ondataavailable = e => chunks.push(e.data);
@@ -587,7 +619,7 @@
             document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
             document.getElementById(`view-${page}`).classList.add('active');
             if(document.getElementById(`nav-${page}`)) document.getElementById(`nav-${page}`).classList.add('active');
-            renderView();
+            window.renderView();
         };
 
         window.renderView = () => {
@@ -604,15 +636,21 @@
         };
 
         function formatTimer(s) { const m = Math.floor(s/60), sec = Math.floor(s%60), ms = Math.floor((s%1)*100); return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}.${ms.toString().padStart(2,'0')}`; }
+        
         function createWav(pcm, rate) {
             const h = new ArrayBuffer(44), v = new DataView(h);
             const s = (o, str) => { for(let i=0; i<str.length; i++) v.setUint8(o+i, str.charCodeAt(i)); };
             s(0, 'RIFF'); v.setUint32(4, 36 + pcm.length, true); s(8, 'WAVE'); s(12, 'fmt ');
             v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
             v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
-            s(36, 'data'); v.setUint32(40, pcm.length, true); return new Uint8Array([...new Uint8Array(h), ...pcm]);
+            s(36, 'data'); v.setUint32(40, pcm.length, true); 
+            const combined = new Uint8Array(44 + pcm.length);
+            combined.set(new Uint8Array(h), 0);
+            combined.set(pcm, 44);
+            return combined;
         }
-        window.switchScriptTab = (t) => { window.state.activeScriptTab = t; renderView(); };
+
+        window.switchScriptTab = (t) => { window.state.activeScriptTab = t; window.renderView(); };
     </script>
 
     <!-- MODAL -->
